@@ -1,14 +1,13 @@
-const express = require("express"); // ładujemy moduł expressa
+const express = require("express"); 
 
-const app = express() // tworzymy aplikację
+const PORT = 9090;
+const app = express() 
 
 // definiowanie endPointu
 app.get('/hello', (req, res) => {
     res.send("Hello World from express server")
 });
 
-const PORT = 9090;
-
 app.listen(PORT, () => {
-    console.log("Serwer uruchomiony!")
+    console.log(`API listening on port ${PORT}`)
 });
