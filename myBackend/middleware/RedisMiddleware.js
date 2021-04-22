@@ -1,6 +1,8 @@
-const redis = require("redis");
+const redis = require('redis');
+const redisHOST = process.env.RD_HOST;
+const redisPORT = process.env.RD_PORT;
 
-RedisMiddleware = function(redisHOST, redisPORT) {
+RedisMiddleware = function() {
 
     redisClient = redis.createClient({
         host: redisHOST,
@@ -18,7 +20,6 @@ RedisMiddleware = function(redisHOST, redisPORT) {
 
     this.getQueryCache = function(key, next) {
         redisClient.get(/* 'postgres:' + */ key, function (err, result) {
-            // console.log('error:', err, 'result:', result);
             if (err || !result) return next(err);
             return next(null, JSON.parse(result));
         });
@@ -29,6 +30,13 @@ RedisMiddleware = function(redisHOST, redisPORT) {
             if (err || !result) return next(err);
             return next(null, result);
         });
+    }
+    
+    this.removeQueryCache = function(key, next) {
+        redisClient.del(/* 'postgres:' + */ key, (err, result) => {
+            if (err || !result) return next(err);
+            return next(null, result);
+        })
     }
 }
 

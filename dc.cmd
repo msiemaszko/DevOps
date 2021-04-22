@@ -29,6 +29,7 @@ GOTO :Koniec
         --detach ^
         --env POSTGRES_PASSWORD=1qaz2wsx ^
         --volume %dockerPath%postgresdata:/var/lib/postgresql/data ^
+        @REM --volume %dockerPath%postgresdata:/var/lib/postgresql/data ^
         --publish 5432:5432 ^
         postgres:alpine
     GOTO :EOF

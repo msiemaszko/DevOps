@@ -1,0 +1,47 @@
+version: '3'
+
+services: 
+
+    myredis: 
+        image: 'redis:alpine'
+        # ports:
+            # - 6379:6379
+
+
+    mypostgres:
+        image: 'postgres:alpine'
+        environment: 
+            - POSTGRES_DB=myappdb
+            - POSTGRES_USER=myappuser
+            - POSTGRES_PASSWORD=1qaz2wsx
+        volumes: 
+            - /D/DevOps/Projekt/postgresdata:/var/lib/postgresql/data
+        ports:  # dla celów debuga otwieram ten port :)
+            - 5432:5432
+
+
+    mybackend:
+        build: 
+            context: ./myBackend
+            dockerfile: Dockerfile.dev
+        volumes: 
+            - /opt/app/node_modules # bookmark - "zostaw folder taki jaki jest", tzn, pominięty podczas mapowania
+            - /D/DevOps/Projekt/myBackend:/opt/app # zamiast kopiowanie, podmapuje loklany katalog
+        environment: 
+            # zmienne dla postgresa
+            - PG_HOST=mypostgres
+            - PG_PORT=5432
+            - PG_DB=myappdb
+            - PG_USER=myappuser
+            - PG_PASS=1qaz2wsx
+            # zmienne dla redisa
+            - RD_HOST=myredis
+            - RD_PORT=6379
+        ports: 
+            - 5000:5000
+        depends_on:     # kontrolowanie kolejności uruchamiania
+            - myredis
+            - mypostgres
+
+        # nadpisanie domyślego CMD - oczekiwanie na postgres.
+        command: ["./wait-for-it.sh", "mypostgres:5432", "-t", "10", "--", "yarn dev"]

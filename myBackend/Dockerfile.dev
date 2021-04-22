@@ -7,4 +7,4 @@ RUN yarn install
 RUN apk add bash
 COPY . .
 
-CMD ["yarn", "start"]
+CMD ["yarn", "dev"]

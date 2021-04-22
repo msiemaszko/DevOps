@@ -1,63 +1,51 @@
-const { Client } = require("pg");
+const { Pool } = require('pg');
+const postgresHOST = process.env.PG_HOST;
+const postgresPORT = process.env.PG_PORT;
 
-PostgresMiddleware = function (postgresHOST, postgresPORT) {
-
-    // create Pool/Client
-    pgClient = new Client({
-        user: "postgres",
-        password: "1qaz2wsx",
-        database: "postgres",
+PostgresMiddleware = function() {
+    
+    const connData = {
         host: postgresHOST,
-        port: postgresPORT
-    });
+        port: postgresPORT,
+        database: process.env.PG_DB,
+        user: process.env.PG_USER,
+        password: process.env.PG_PASS
+    };
 
-    // init connection
-    // pgClient
-    //     .on('connect', () => {
-    //         console.log(`Connected to Postgres server at ${postgresHOST}:${postgresPORT}`);
-
-    //     })
-    //     .on('error', () => {
-    //         console.log('Postgres not connected');
-    //     })
-
-    //     .query(`
-    //         CREATE TABLE IF NOT EXISTS computers (
-    //             id SERIAL,
-    //             type varchar, 
-    //             name varchar, 
-    //             CONSTRAINT computers_pk PRIMARY KEY(id)
-    //         )`
-    //     )
-
-    //     .catch((err) => {
-    //         console.log(err);
-    //     })
-    //     ;
-
-    let sqlCreate = `
+    const sqlCreate = `
         CREATE TABLE IF NOT EXISTS computers (
             id SERIAL,
             type varchar, 
             name varchar, 
             CONSTRAINT computers_pk PRIMARY KEY(id)
         )`;
+
     
-    pgClient
-        .connect()
-        .then(() => console.log(`Connected to Postgres server at ${postgresHOST}:${postgresPORT}`))
-        .then(() => pgClient.query(sqlCreate))
-        .catch(e => console.log(e))
-    //     .finally(() => pgClient.end())
+    const pgQuery = (sqlText, parametrs, callbackFunc) => {
+        // przy każym zapytaniu nowe połączenie - czy to dobre rozwiazanie?
+        let clinet = new Pool(connData);
+        clinet
+            .connect()
+            // .then(() => console.log(`Connected to Postgres server at ${postgresHOST}:${postgresPORT}`))
+            .then(() => clinet.query(sqlText, parametrs, (error, result) => {
+                if (error) {
+                    throw error
+                }
+                callbackFunc(null, result);
+            }))
+            .catch(e => console.log(e))
+            .finally(() => clinet.end())
+    }
 
+    // Create DB if not exists.
+    pgQuery(sqlCreate, [], () => {
+        console.log(`Connected to Postgres server at ${postgresHOST}:${postgresPORT}`)
+    })
 
-    function pgQuery(sqlText, parametrs, callbackFunc) {
-        pgClient.query(sqlText, parametrs, (error, result) => {
-            if (error) {
-                throw error
-            }
-            callbackFunc(null, result);
-        });
+    this.getRows = function(tableName, callbackFunc) {
+        pgQuery(`SELECT * FROM ${tableName} ORDER BY 1`, [],
+            (error, result) => callbackFunc(error, result.rows)
+        );
     }
 
     this.getRowById = function (tableName, id, callbackFunc) {
@@ -66,24 +54,31 @@ PostgresMiddleware = function (postgresHOST, postgresPORT) {
         );
     }
 
-    this.getRows = function (tableName, callbackFunc) {
-        pgQuery(`SELECT * FROM ${tableName}`, [],
-            (error, result) => callbackFunc(error, result.rows)
-        );
-    }
-
-    this.insertRow = function (tableName, entObject, callbackFunc) {
+    this.insertRow = function(tableName, entObject, callbackFunc) {
         let keyValueJson = jsonToKeyValueString(entObject);
         let sqlText = `INSERT INTO ${tableName} (${keyValueJson['keys']}) VALUES (${keyValueJson['values']}) RETURNING id`;
-        pgQuery(sqlText, [],
+        pgQuery(sqlText, [], 
             (error, result) => callbackFunc(error, result.rows[0])
         );
     }
 
-    function jsonToKeyValueString(jsonObject) {
-        var keys = '';
-        var values = '';
-        for (var key in jsonObject) {
+    this.deleteRow = function(tableName, rowId, callbackFunc) {
+        pgQuery(`DELETE FROM ${tableName} WHERE id = $1`, [rowId],
+            (error, result) => callbackFunc(error, result.rows[0])
+        );
+    }
+
+    this.updateRow = function (tableName, entObject, callbackFunc) {
+        const sqlText = `UPDATE ${tableName} SET type = $1, name = $2 WHERE id = $3`;
+        pgQuery(sqlText, [entObject.type, entObject.name, entObject.id],
+            (error, result) => callbackFunc(error, result.rows[0])
+        );
+    }
+    
+    const jsonToKeyValueString = jsonObject => {
+        let keys = '';
+        let values = '';
+        for (let key in jsonObject) {
             keys += `${key},`;
             values += `'${jsonObject[key]}',`;
         }
