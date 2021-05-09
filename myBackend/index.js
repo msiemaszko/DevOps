@@ -88,7 +88,7 @@ app.delete('/computer/:id', (request, response) => {
     const id = parseInt(request.params.id);
     console.log(`\nRequest from ${getUserFromRequest(request)} - DELETE (id: ${id})`);
 
-    myDb.deleteComputer(id, (error, result) => {
+    myDb.deleteComputer(id, error => {
         if (!error) response.status(200).send('ok');
         else
             response.status(500).send(`something went wrong while deleting computer id ${id}`);
@@ -102,11 +102,10 @@ app.put('/computer', (request, response) => {
     const computerEnt = request.body;
     console.log(`\nRequest from ${getUserFromRequest(request)} - PUT (id: ${computerEnt.id})`);
 
-    myDb.updateComputer(computerEnt, (error, result) => {
+    myDb.updateComputer(computerEnt, error => {
         if (!error) response.status(200).send('ok');
         else
-            response.status(404).send(`something went wrong while updating computer: ${computerEnt.id}`);
-        // TODO: errorcode!
+            response.status(505).send(`something went wrong while updating computer: ${computerEnt.id}`);
     });
 });
 

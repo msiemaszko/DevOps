@@ -4,8 +4,6 @@ services:
 
     myredis: 
         image: 'redis:alpine'
-        # ports:
-            # - 6379:6379
 
 
     mypostgres:
@@ -15,33 +13,50 @@ services:
             - POSTGRES_USER=myappuser
             - POSTGRES_PASSWORD=1qaz2wsx
         volumes: 
-            - /D/DevOps/Projekt/postgresdata:/var/lib/postgresql/data
-        ports:  # dla celów debuga otwieram ten port :)
-            - 5432:5432
+            - ./postgresdata:/var/lib/postgresql/data
 
 
     mybackend:
+        restart: always
         build: 
-            context: ./myBackend
             dockerfile: Dockerfile.dev
+            context: ./mybackend
         volumes: 
             - /opt/app/node_modules # bookmark - "zostaw folder taki jaki jest", tzn, pominięty podczas mapowania
-            - /D/DevOps/Projekt/myBackend:/opt/app # zamiast kopiowanie, podmapuje loklany katalog
+            - ./mybackend:/opt/app # zamiast kopiowanie, podmapuje loklany katalog
         environment: 
-            # zmienne dla postgresa
-            - PG_HOST=mypostgres
+            - PG_HOST=mypostgres # env var dla postgresa
             - PG_PORT=5432
             - PG_DB=myappdb
             - PG_USER=myappuser
-            - PG_PASS=1qaz2wsx
-            # zmienne dla redisa
-            - RD_HOST=myredis
+            - PG_PASS=1qaz2wsx 
+            - RD_HOST=myredis # env var dla redisa
             - RD_PORT=6379
-        ports: 
-            - 5000:5000
-        depends_on:     # kontrolowanie kolejności uruchamiania
-            - myredis
-            - mypostgres
+            
+        # nadpisanie domyślego CMD - oczekiwanie na postgres
+        command: ./wait-for-it.sh mypostgres:5432 -t 15 -- yarn dev
+        # ports: 
+        #     - 5000:5000
 
-        # nadpisanie domyślego CMD - oczekiwanie na postgres.
-        command: ["./wait-for-it.sh", "mypostgres:5432", "-t", "10", "--", "yarn dev"]
+
+    mynginx:
+        restart: always
+        build:
+            dockerfile: Dockerfile
+            context: ./mynginx
+        ports:
+            - 80:80
+        depends_on: 
+            - mybackend
+            - myfrontend
+        
+    
+    myfrontend:
+        build: 
+            dockerfile: Dockerfile.dev
+            context: ./myfrontend      
+        environment: 
+            CHOKIDAR_USEPOLLING: 'true' # watching files env
+        volumes:
+            - /opt/app/node_modules # pomiń node_modules podczas mapowania
+            - ./myfrontend:/opt/app # zamapuj pozostałe pliki aplikacji
