@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: my-nginx-replicaset # ta nazwa będzie widoczna w: > ... get replicaset
+  labels: # czego dotyczny
+    component: web
+    app: my-app
+
+#podajemy template dla PODów.
+spec:
+  template: # jakiego wzorca ma te repliki tworzyć
+    metadata: # wzorzec tego czyn on zarządza
+      name: my-nginx-pod
+      labels:
+        component: web
+        app: my-app
+    spec:
+      containers:
+        - name: my-nginx-container
+          # image: nginx:alpine
+          image: marekprezes/mynginxk8s
+
+  replicas: 5 # ile ma być replik
+
+  selector: 
+    matchLabels:
+      app: my-app
+      component: web

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment # tylko to zostało zmienione względem pliku my-nginx-replicaset.yaml
+metadata:
+  name: my-nginx-deployment # ta nazwa będzie widoczna w: > ... get deployment
+  labels: # czego dotyczny
+    component: web
+    app: my-app
+
+#podajemy template dla PODów.
+spec:
+  template: # jakiego wzorca ma te repliki tworzyć
+    metadata: # wzorzec tego czyn on zarządza
+      name: my-nginx-pod
+      labels:
+        component: web
+        app: my-app
+    spec:
+      containers:
+        - name: my-nginx-container
+          image: nginx:alpine
+
+  replicas: 3 # ile ma być replik
+
+  selector: 
+    matchLabels:
+      app: my-app
+      component: web
