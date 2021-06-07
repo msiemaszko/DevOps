@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-local
+  labels:
+    type: local
+
+spec:
+  storageClassName: manual
+  capacity: # zadeklarowana pojemność
+    storage: 20Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath: # lokalizacja w naszym OS host
+    path: /run/desktop/mnt/host/d/DevOps/GIT/kubernetes/lab3/k8spv
+

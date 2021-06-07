@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mybackend-deployment
+  labels:
+    app: my-app
+    component: backend
+
+spec:
+  replicas: 3
+
+  # definiuje jak deployment ma odnaleźć PODy do zarządzania
+  selector: 
+    matchLabels:
+      app: my-app
+      component: backend
+  
+  # szablon PODów tworzonego przez replikaSet
+  template:
+    metadata:
+      name: mybackend-pod
+      labels:
+        app: my-app
+        component: backend
+    spec: # wskazuje jaki kontener ma być uruchomiony w POD
+      containers:
+        - name: mybackendlb-container
+          image: marekprezes/mybackendlb
+          env:
+            # mapowanie ENV z ConfigMap
+            - name: PG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: mypostgres-config
+                  key: PG_HOST
+              
+            - name: PG_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: mypostgres-config
+                  key: PG_PORT
+              
+            - name: PG_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: mypostgres-config
+                  key: PG_DB
+            
+            - name: PG_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: mypostgres-config
+                  key: PG_USER
+            
+            # mapowanie EVN z secret
+            - name: PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: myapp-secret
+                  key: PG_PASS
+

@@ -1,15 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mybackendlb-clusterip
-
+  name: mybackend-clusterip
 
 spec:
-  type: ClusterIp
-  port:
-    - ports: 5000
+  type: ClusterIP
+  ports:
+    - port: 5000
       targetPort: 5000
   
   selector:
-    component: backend
     app: my-app
+    component: backend

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mybackendlb-deployment # ta nazwa widoczna w: > ... get deployment
+  labels: # czego dotyczny
+    app: my-app
+    component: backend
+
+#podajemy template dla PODów.
+spec:
+  replicas: 3 # zdefiniowana ilość podsów dla replikaSet
+
+  # definiuje jak deployment ma odnaleźć PODy do zarządzania
+  selector: 
+    matchLabels:
+      component: backend
+      app: my-app
+  
+  # szablon PODów tworzonego przez replikaSet
+  template:
+    metadata:
+      name: mybackendlb-pod
+      labels:
+        component: backend
+        app: my-app
+    spec: # wskazuje jaki kontener ma być uruchomiony w POD
+      containers:
+        - name: mybackendlb-container
+          image: marekprezes/mybackendlb
+

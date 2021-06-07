@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: mypostgres-deployment
+  labels:
+    app: my-app
+    component: db
+
+spec: #dot deployment
+  template:
+    
+    metadata:
+      name: mypostgres-pod
+      labels:
+        app: my-app
+        component: db
+    
+    spec: # dot POD
+      containers:
+        - name: mypostgres-container
+          image: postgres:alpine
+          volumeMounts: # w którym miejscu wewnątrz podpięty
+            - mountPath: /var/lib/postgresql/data
+              name: postgresvolume
+              # subPath: postgres # podkatalog w wolumenie
+          env:
+            # - name: POSTGRES_PASSWORD # zakomentowane bo bedzie przekazywane z secret
+            #   value: 1qaz2wsx
+            
+            # mapowanie ENV z ConfigMap
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: mypostgres-config
+                  key: PG_DB
+            
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: mypostgres-config
+                  key: PG_USER
+            
+            # mapowanie EVN z secret
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: myapp-secret
+                  key: PG_PASS
+
+      volumes:  # definiuje co to jest postgresvolume
+        - name: postgresvolume # po tym ma skojarzyć
+          persistentVolumeClaim:
+            claimName: postgres-pvc # dopasowanie
+
+  replicas: 1 # nie wolno dać więcej niż jeden !!
+  # dwa silniki db nie mogą wskazywać na te same miejscu na dysku
+
+  selector:
+    matchLabels:
+      app: my-app
+      component: db
+
+
+
+
