@@ -4,6 +4,7 @@ const postgresPORT = process.env.PG_PORT;
 
 PostgresMiddleware = function() {
     
+    // console.log(`Postgres: ${postgresHOST}:${postgresPORT}`);
     const connData = {
         host: postgresHOST,
         port: postgresPORT,

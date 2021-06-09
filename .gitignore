@@ -2,6 +2,12 @@
 /postgresdata
 **/test
 
+**/k8spv
+**/k8s-pv
+**/frontapp
+**/build
+
+
 logs
 *.log
 npm-debug.log*

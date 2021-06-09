@@ -4,6 +4,7 @@ const redisPORT = process.env.RD_PORT;
 
 RedisMiddleware = function() {
 
+    // console.log(`Redis: ${redisHOST}:${redisPORT}`);
     redisClient = redis.createClient({
         host: redisHOST,
         port: redisPORT,
