@@ -1,0 +1,26 @@
+# PRODUKCYJNE 
+# run with context to parent-parent direcotry: ../.. :)
+# also using dockerignore from ../..
+
+# pomocniczy
+FROM node:alpine as builder
+
+WORKDIR /opt/app
+
+COPY /projekt_docker/myfrontend/package.json ./
+
+RUN yarn install
+
+COPY /projekt_docker/myfrontend/ .
+
+RUN yarn build 
+
+
+# wynikowy kontener
+FROM nginx as server
+
+COPY projekt_k8s/comp-app_frontend/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=builder /opt/app/build /www
+
+EXPOSE 80

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: my-postgres-deployment
+  namespace: comp-app-namespace
+  labels:
+    app: comp-app
+    component: db
+
+spec: #dot deployment
+  replicas: 1 # nie wolno dać więcej niż jeden !!
+  # dwa silniki db nie mogą wskazywać na te same miejscu na dysku
+
+  selector:
+    matchLabels:
+      app: comp-app
+      component: db
+  
+  template:
+    metadata:
+      name: my-postgres-pod
+      labels:
+        app: comp-app
+        component: db
+
+    spec: # dot POD
+      containers:
+        - name: my-postgres-container
+          image: postgres:alpine
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data # gdzie podpiąć
+              name: postgresvolume                # co podpiąć - klucz
+              subPath: postgres                   # podkatalog w wolumenie
+          ports:
+            - containerPort: 5432
+          
+          env:
+            # mapowanie ENV z ConfigMap
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: my-postgres-config
+                  key: PG_DB
+            
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: my-postgres-config
+                  key: PG_USER
+            
+            # mapowanie EVN z secret
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-postgres-secret
+                  key: PG_PASS            
+
+      volumes:  # wolumeny podpinane pod deploy
+        - name: postgresvolume # klucz po którym będzie kojarzone
+          persistentVolumeClaim:
+            claimName: my-postgres-pvc # dopasowanie do PVC
+
+
+

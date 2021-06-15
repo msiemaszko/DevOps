@@ -1,6 +1,7 @@
 /webApp/node_modules
 /postgresdata
 **/test
+yarn.lock
 
 logs
 *.log

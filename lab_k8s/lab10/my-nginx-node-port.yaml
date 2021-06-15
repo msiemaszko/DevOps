@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx-node-port
+
+spec:
+  type: NodePort
+
+  selector:
+    component: web
+    app: my-app
+
+  ports:
+    - port: 80
+      targetPort: 80 
+      nodePort: 31001
+

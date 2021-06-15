@@ -11,7 +11,7 @@ import './ComputersList.css';
 
 
 const ComputersList = () => {
-    const [computersList, setComputersList] = useState([]);
+    const [computersList, setComputersList] = useState(null); // []
     
     // modal: form new/edit computer
     const [doesFormShow, setFormShow] = useState(false);
@@ -155,20 +155,25 @@ const ComputersList = () => {
     return (
         <div>
             <h2>Computers</h2>
-            {computersList.length ?
-                <Table striped bordered hover>
-                    <thead className="thead-dark">
-                        <tr>
-                            <th>#</th>
-                            <th>Type</th>
-                            <th>Model</th>
-                            <th>Modify</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tableRows}
-                    </tbody>
-                </Table>
+            {
+                computersList ? // when loaded
+                (
+                    computersList.length > 0 ? // when not empty
+                    <Table striped bordered hover>
+                        <thead className="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Type</th>
+                                <th>Model</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tableRows}
+                        </tbody>
+                    </Table>
+                    : <p>there is no any computers :(</p>
+                )
                 : <Loading />
             }
 

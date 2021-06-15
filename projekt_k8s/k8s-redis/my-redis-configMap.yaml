@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-redis-config
+  namespace: comp-app-namespace
+
+data:
+  RD_HOST: my-redis-clusterip
+  RD_PORT: '6379'

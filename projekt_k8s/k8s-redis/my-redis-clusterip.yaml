@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-redis-clusterip
+  namespace: comp-app-namespace
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: comp-app
+    component: cache
+  
+  ports:
+    - port: 6379
+      targetPort: 6379

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx-deployment
+  namespace: comp-app-namespace
+  labels:
+    app: comp-app
+    component: frontend
+
+spec:
+  replicas: 1
+
+  selector: 
+    matchLabels:
+      app: comp-app
+      component: frontend
+
+  template:
+    metadata:
+      name: my-nginx-pod
+      labels:
+        app: comp-app
+        component: frontend
+    spec:
+      containers:
+        - name: my-nginx-container
+          image: marekprezes/comp-app_frontend:latest
+          ports:
+            - containerPort: 80

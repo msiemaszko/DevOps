@@ -1,0 +1,14 @@
+# builder
+FROM node:15.11.0-alpine3.13 as builder
+WORKDIR /opt/app
+COPY ./package.json ./
+RUN yarn install
+COPY . .
+RUN yarn build
+
+
+# server
+FROM nginx
+COPY --from=builder /opt/app/build /www
+
+EXPOSE 80

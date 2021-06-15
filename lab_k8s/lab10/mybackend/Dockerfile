@@ -3,8 +3,9 @@ FROM node:alpine
 WORKDIR /opt/app
 
 COPY ./package.json ./
+
 RUN yarn install
-RUN apk add bash
+
 COPY . .
 
-CMD yarn start
+CMD ["node",  "index.js"]

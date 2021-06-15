@@ -3,7 +3,7 @@
 **/test
 
 **/k8spv
-**/k8s-pv
+**/k8s-pv/data/
 **/frontapp
 **/build
 
