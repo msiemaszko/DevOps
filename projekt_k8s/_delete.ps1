@@ -1,6 +1,7 @@
 
 kubectl delete namespace comp-app-namespace
 kubectl delete namespace ingress-nginx
+kubectl delete pv pv-local --namespace comp-app-namespace
 
 # kubectl delete deploy my-nginx-deployment
 # kubectl delete deploy my-backend-deployment

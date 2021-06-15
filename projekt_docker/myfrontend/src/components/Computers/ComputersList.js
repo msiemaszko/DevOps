@@ -156,10 +156,10 @@ const ComputersList = () => {
         <div>
             <h2>Computers</h2>
             {
-                computersList ? // when loaded
-                (
-                    computersList.length > 0 ? // when not empty
-                    <Table striped bordered hover>
+                computersList // when loaded
+                ? (
+                    computersList.length > 0 // when not empty
+                    ? <Table striped bordered hover>
                         <thead className="thead-dark">
                             <tr>
                                 <th>#</th>
