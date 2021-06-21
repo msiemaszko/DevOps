@@ -1,0 +1,1 @@
+kubectl logs -l app=comp-app -l component=backend --follow --namespace comp-app-namespace
